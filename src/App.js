@@ -30,19 +30,9 @@ class App extends Component {
   }
 
   render() {
-    
-
     const { user } = this.state
     return (
-      <BrowserRouter>
-        <Switch>
-          <Route path='/' exact component={Auth} />
-          <Route path='/home' exact render={() => (
-            user ? 
-            <Home/> :  <Redirect to='/'/>
-          )}/>
-        </Switch>  
-      </BrowserRouter>
+      <Home/>
     )
   }
 }
