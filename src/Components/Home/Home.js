@@ -1,7 +1,12 @@
 import React, { Component } from 'react';
 import {Input, Button} from 'antd'
 import * as firebase from 'firebase'
-class Home extends Component {
+import { compose, bindActionCreators } from 'redux'
+import { connect } from 'react-redux'
+import {Actions} from '../../store/actions'
+
+
+class home extends Component {
 
   state = {
     todoText: '',
@@ -18,6 +23,7 @@ class Home extends Component {
       snap.forEach(val => {
         temp.push(val.val())
       })
+      this.props.addAllToDos(temp)
       this.setState({
         todos: temp
       })
@@ -65,7 +71,8 @@ class Home extends Component {
     db.ref().update(setData)
   }
   
-  render() { 
+  render() {
+    console.log(this.props) 
     return (
       <div style={{height: '100%'}}>
         <div style={{display:'flex', flexDirection:'column', alignItems:'center', margin: 50}}>
@@ -81,10 +88,21 @@ class Home extends Component {
               {item.complete ? <span>Completed</span> : <Button type='primary' onClick={() => this.onTodosComplete(item)}>Mark as Complete</Button>}
             </div>
           ))}
+
         </div>
       </div>
     )
   }
 }
+
+function mapDispatchToProps(dispatch){
+  return bindActionCreators(Actions, dispatch)
+}
+
+let Home = compose(
+  connect((state) => ({
+    store: state
+  }), mapDispatchToProps)
+)(home)
 
 export default Home;
