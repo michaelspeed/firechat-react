@@ -3,8 +3,9 @@ import 'antd/dist/antd.css';
 import { init as firebaseInit } from './firebase/firebase'
 import Home from './Components/Home/Home'
 import Auth from './Components/Auth/Auth'
+import Account from './Components/Acoount/account'
 import * as firebase from 'firebase'
-import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
+import { BrowserRouter, Route, Switch } from 'react-router-dom'
 
 class App extends Component {
   constructor(props) { 
@@ -32,7 +33,12 @@ class App extends Component {
   render() {
     const { user } = this.state
     return (
-      <Home/>
+      <BrowserRouter>
+        <Switch>
+          <Route path='/' exact component={Home} />
+          <Route path='/account/:uid' exact component={Account}/> 
+        </Switch>  
+      </BrowserRouter>
     )
   }
 }

@@ -1,95 +1,101 @@
 import React, { Component } from 'react';
-import {Input, Button} from 'antd'
+import {Input, Button, Modal, Popconfirm, message, notification, Spin} from 'antd'
 import * as firebase from 'firebase'
 import { compose, bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
-import {Actions} from '../../store/actions'
+import { Actions } from '../../store/actions'
 
+const dik = 'hkhvber93felkf033r938483403840adsjfalf'
+const him = 'hjdsdndwhjda7duyw87adahkdadyaabdk8wydy8'
+
+const list = [
+  {
+    name: 'djskdjk',
+    id:'dksdkksdklklksld'
+  },{
+    name: 'djskdadaddjk',
+    id:'dksdkksdkdaafggvdvlklksld'
+  },{
+    name: 'djskdjk',
+    id:'dsdsdafgdbgsgggsdkksdklklksld'
+  },{
+    name: 'djsrtrtrrkdjk',
+    id:'dksdkksdkrglklksld'
+  },{
+    name: 'djsrgrrtktrdjk',
+    id:'dkssgdgkktteresdklklksld'
+  }
+]
 
 class home extends Component {
-
   state = {
-    todoText: '',
-    todos: []
+    isLoginOpen: false,
+    some: '',
+    all: false,
+    allList: []
   }
 
-  componentDidMount(){
-    const db = firebase.database()
-    const todoRef = db.ref('/todo/')
-    const temp = []
-
-    // reading once
-    todoRef.once('value', snap => {
-      snap.forEach(val => {
-        temp.push(val.val())
-      })
-      this.props.addAllToDos(temp)
-      this.setState({
-        todos: temp
-      })
-    })
-
-    //reading when child is added
-    var clonedArry = this.state.todos.slice()
-    todoRef.on('child_added', snap => {
-      clonedArry.push(snap.val())
-      this.setState({
-        todos: clonedArry
-      })
+  componentDidMount() { 
+    var db = firebase.database()
+    var ref = db.ref('/user')
+    ref.on('value', snap => { 
+      this.setState({allList: snap})
     })
   }
 
-  onSaveTodo = () => {
-    const db = firebase.database()
-    var key = db.ref().child('todo').push().key
-    //var key = db.ref('/todo').push.key  <-- same
-
-    const todoObj = {
-      text: this.state.todoText,
-      complete: false,
-      id: key
-    }
-    var setData = {}
-    setData['/todo/'+ key] = todoObj
-    db.ref().update(setData).then(() => {
-      this.setState({
-        todoText:''
-      })
+  onSignInVisible = () => { 
+    this.setState({
+      isLoginOpen: true
     })
   }
 
-  onTodosComplete = item =>  {
-    const db = firebase.database()
-    const completed = {
-      text: item.text,
-      complete: true,
-      id: item.id
-    }
-
-    var setData = {}
-    setData['/todo/'+ item.id] = completed
-    db.ref().update(setData)
+  onSigncancel = () => { 
+    this.setState({
+      isLoginOpen: false
+    })
   }
-  
+
+  onSignIn = () => {
+    notification.config({
+      placement: 'bottomLeft',
+      bottom: 20,
+      duration: 5,
+    })
+    this.setState({
+      isLoginOpen: false
+    })
+    notification.success({
+      message: 'you are now logged in',
+      description:'Please proceed to your inbox'
+    })
+  }
+
+  onGoToDIkAccount = id => { 
+    this.props.history.push(`/account/${id}`)
+  }
+
   render() {
     console.log(this.props) 
     return (
-      <div style={{height: '100%'}}>
-        <div style={{display:'flex', flexDirection:'column', alignItems:'center', margin: 50}}>
-          <Input placeholder='Write a TODO //' style={{ margin: 20 }} 
-            onChange={event => this.setState({todoText: event.target.value})} value={this.state.todoText}/> 
-          <div>
-            <Button type='primary' style={{ margin: 20 }} onClick={this.onSaveTodo}> Submit TODO</Button>
-          </div>
-
-          {this.state.todos.map(item => (
-            <div style={{display:'flex', flexDirection:'row', justifyContent:'space-between', alignContent:'flex-start', margin: 20}} key={item.id}>
-              <span style={{marginRight: 10}}>{item.text}</span>
-              {item.complete ? <span>Completed</span> : <Button type='primary' onClick={() => this.onTodosComplete(item)}>Mark as Complete</Button>}
-            </div>
-          ))}
-
+      <div style={{ height: '100%' }}>
+        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', padding: 10 }}>
+          <Button type='primary' onClick={() => this.onGoToDIkAccount(dik)}>Go to Dik account</Button>
+          <Button type='primary' onClick={() => this.onGoToDIkAccount(him)}>Go to Him account</Button>
+          {this.state.isLoginOpen ? <Spin/> : <Popconfirm title='Are you sure you want to login?' onConfirm={this.onSignInVisible} placement="leftBottom">
+          <Button type='primary'>SignIn</Button>  
+        </Popconfirm>}  
         </div>
+        <div style={{display:'flex', flexDirection:'column'}}>
+          {list.map(item => (
+            <Button type='primary' style={{ margin: 10 }} onClick={() => this.onGoToDIkAccount(item.id)}>{item.name}</Button>
+          ) )}
+        </div>
+        <Modal title='SignIn' visible={this.state.isLoginOpen} maskClosable={false} closable={true} onCancel={this.onSigncancel} onOk={this.onSignIn}>
+          <div>
+            <Input placeholder='Email' />
+            <Input placeholder='Password'/>
+          </div>  
+        </Modal>
       </div>
     )
   }
